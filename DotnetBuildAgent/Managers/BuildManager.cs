@@ -27,9 +27,9 @@ namespace DotnetBuildAgent
 			}
 		}
 
-		public Agent CreateAgent(string name, string path, int timeInterval) 
+		public Agent CreateAgent(string name, string path, int timeInterval, AgentType agentType) 
 		{
-			Agent agent = new Agent { Id = _currentAgentId, Name = name, Path = path, TimeInterval = timeInterval };
+			Agent agent = new Agent { Id = _currentAgentId, Name = name, Path = path, TimeInterval = timeInterval, AgentType = agentType };
 			_currentAgentId++;
 			return agent;
 		}
@@ -123,7 +123,7 @@ namespace DotnetBuildAgent
 		{
 			foreach (Agent agent in _storedAgents)
 			{
-				Console.WriteLine($"ID: {agent.Id}| Name:{agent.Name}| TimeInterval:{agent.TimeInterval} Path:{agent.Path}");
+				Console.WriteLine($"ID: {agent.Id}| Name:{agent.Name}| TimeInterval:{agent.TimeInterval}| AgentType:{agent.AgentType}| Path:{agent.Path}");
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace DotnetBuildAgent
 		{
 			foreach (Agent agent in _executedAgents)
 			{
-				Console.WriteLine($"ID: {agent.Id}| Name:{agent.Name}| TimeInterval:{agent.TimeInterval} Path:{agent.Path}");
+				Console.WriteLine($"ID: {agent.Id}| Name:{agent.Name}| TimeInterval:{agent.TimeInterval}| AgentType:{agent.AgentType}| Path:{agent.Path}");
 			}
 		}
 
@@ -148,7 +148,7 @@ namespace DotnetBuildAgent
 			} while (IsRunningProcesses);
 		}
 
-		private void Stop()
+		public void Stop()
 		{
 			Console.WriteLine("Stopping agent queue...");
 			IsRunningProcesses = false;

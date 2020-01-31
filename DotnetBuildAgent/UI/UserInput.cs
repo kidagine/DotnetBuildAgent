@@ -83,11 +83,11 @@ namespace DotnetBuildAgent
 			do
 			{
 				Console.Write("Insert interval time: ");
-				bool isNumber = int.TryParse(Console.ReadLine(), out int number);
-				if (isNumber && number >= 1000)
+				bool isNumber = int.TryParse(Console.ReadLine(), out int outTimeInterval);
+				if (isNumber && outTimeInterval >= 1000)
 				{
 					hasSetTimeInterval = true;
-					timeInterval = number;
+					timeInterval = outTimeInterval;
 				}
 				else if (!isNumber)
 				{
@@ -95,12 +95,37 @@ namespace DotnetBuildAgent
 				}
 				else
 				{
-					Console.WriteLine("The time interval you inserted was too low.");
+					Console.WriteLine("The time interval you inserted was too low/high.");
 				}
 			} while (!hasSetTimeInterval);
 
+			foreach (AgentType agentTypeOption in Enum.GetValues(typeof(AgentType)))
+			{
+				Console.WriteLine($"{(int) agentTypeOption}. {agentTypeOption} Agent");
+			}
 
-			Agent createdAgent = BuildManager.Instance.CreateAgent(name, Path, timeInterval);
+			bool hasSetAgentType = default;
+			AgentType agentType = default;
+			do
+			{
+				Console.Write("Choose agent type: ");
+				bool isEnum = Enum.TryParse(Console.ReadLine(), out AgentType outAgent);
+				if (isEnum && (int)outAgent >= 0 && (int)outAgent < 2)
+				{
+					hasSetAgentType = true;
+					agentType = outAgent;
+				}
+				else if (!isEnum)
+				{
+					Console.WriteLine("The value you inserted was not a number.");
+				}
+				else
+				{
+					Console.WriteLine("The agent option you inserted was not available.");
+				}
+			} while (!hasSetAgentType);
+
+			Agent createdAgent = BuildManager.Instance.CreateAgent(name, Path, timeInterval, agentType);
 			if (createdAgent != null)
 			{
 				BuildManager.Instance.AddAgent(createdAgent);
@@ -165,9 +190,9 @@ namespace DotnetBuildAgent
 			string agentName = Console.ReadLine();
 
 			Console.WriteLine();
+			Agent startAgent = BuildManager.Instance.GetAgent(agentName);
 			Console.WriteLine($"Starting agent: {agentName}");
 
-			Agent startAgent = BuildManager.Instance.GetAgent(agentName);
 			if (startAgent != null)
 			{
 				BuildManager.Instance.StartAgent(startAgent);

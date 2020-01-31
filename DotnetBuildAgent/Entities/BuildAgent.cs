@@ -6,6 +6,8 @@ namespace DotnetBuildAgent
 {
 	public class BuildAgent
 	{
+		private readonly string _fileName = "dotnet";
+
 		public void Build(Agent agent)
 		{
 			Thread thread = new Thread(() =>
@@ -16,8 +18,8 @@ namespace DotnetBuildAgent
 					{
 						StartInfo =
 						{
-							FileName = "dotnet",
-							Arguments = "build",
+							FileName = _fileName,
+							Arguments = agent.AgentType.ToString().ToLower(),
 							UseShellExecute = false,
 							RedirectStandardOutput = true,
 							WorkingDirectory = agent.Path
@@ -27,7 +29,17 @@ namespace DotnetBuildAgent
 					string log = process.StandardOutput.ReadToEnd();
 					LogManager.Instance.LogText += log;
 					Console.WriteLine(log);
-					Thread.Sleep(agent.TimeInterval);
+					if (log.Contains("Error"))
+					{
+						//Console.WriteLine("Test Failed");
+						//BuildManager.Instance.Stop();
+						//Console.WriteLine();
+						//Console.WriteLine("Press a key to exit build");
+					}
+					else
+					{
+						Thread.Sleep(agent.TimeInterval);
+					}
 				}
 			});
 			thread.Start();

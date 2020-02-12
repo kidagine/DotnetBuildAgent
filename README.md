@@ -1,2 +1,2 @@
 # DotnetBuildAgent
-A simple build agent for dotnet made through accessed through a console application
+This is a basic dotnet agent that is accessed through a simple console interface, capable of running agents to build in parallel.

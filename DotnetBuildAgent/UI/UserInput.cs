@@ -203,7 +203,7 @@ namespace DotnetBuildAgent
 		{
 			Console.WriteLine();
 			Console.WriteLine("Starting agent queue...");
-			BuildManager.Instance.StartAgentQueue();
+			BuildManager.Instance.StartAgentQueueAsync();
 		}
 
 		public void ListAgents()

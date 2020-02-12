@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace DotnetBuildAgent
 {
@@ -9,10 +10,12 @@ namespace DotnetBuildAgent
 	{
 		private readonly List<Agent> _storedAgents = new List<Agent>();
 		private readonly List<Agent> _executedAgents = new List<Agent>();
+		private readonly List<Task> _agentTasks = new List<Task>();
 		private int _currentAgentId = default;
 		private static BuildManager _instance = null;
 
 		public bool IsRunningProcesses { get; set; } = true;
+		public CancellationTokenSource cancellationTokenSource { get; set; }
 
 
 		public static BuildManager Instance
@@ -92,10 +95,9 @@ namespace DotnetBuildAgent
 
 			BuildAgent buildAgent = new BuildAgent();
 			buildAgent.Build(agent);
-			CheckStop();
 		}
 
-		public void StartAgentQueue()
+		public void StartAgentQueueAsync()	
 		{
 			if (_executedAgents.Count > 0)
 			{
@@ -105,12 +107,13 @@ namespace DotnetBuildAgent
 				Console.WriteLine();
 				Thread.Sleep(1000);
 
+				BuildAgent buildAgent = new BuildAgent();
 				foreach (Agent agent in _executedAgents)
 				{
-					BuildAgent buildAgent = new BuildAgent();
-					buildAgent.Build(agent);
+					Task task = Task.Run(() => buildAgent.Build(agent));
+					_agentTasks.Add(task);
 				}
-				CheckStop();
+				Task.WaitAll(_agentTasks.ToArray());
 			}
 			else
 			{
@@ -133,32 +136,6 @@ namespace DotnetBuildAgent
 			{
 				Console.WriteLine($"ID: {agent.Id}| Name:{agent.Name}| TimeInterval:{agent.TimeInterval}| AgentType:{agent.AgentType}| Path:{agent.Path}");
 			}
-		}
-
-		private void CheckStop()
-		{
-			ConsoleKeyInfo consoleKeyInfo;
-			do
-			{
-				consoleKeyInfo = Console.ReadKey(true);
-				if (consoleKeyInfo.Key == ConsoleKey.F)
-				{
-					Stop();
-				}
-			} while (IsRunningProcesses);
-		}
-
-		public void Stop()
-		{
-			Console.WriteLine("Stopping agent queue...");
-			IsRunningProcesses = false;
-			foreach (Process process in Process.GetProcessesByName("dotnet"))
-			{
-				process.Kill();
-			}
-			Console.WriteLine("Stopped agent queue");
-			LogManager.Instance.LogBuild();
-			Console.WriteLine("Logged build");
 		}
 	}
 }
